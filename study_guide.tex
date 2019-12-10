@@ -35,7 +35,7 @@ $$x^{(i)} = \left[x_0^{(i)}\ x_1^{(i)}\ x_2^{(i)}\ \dots \ x_n^{(i)}\right]^T$$
 and outputs $y^{(i)}$, and we want to learn a set of parameters
 $$\theta = \left[\theta_0\ \theta_1\ \theta_2\ \dots \ \theta_n\right]^T$$
 such that
-$$\theta^T x^{(i)} = \sum_{j=1}^n \theta_j x_j^{(i)} = h_{\theta}\left(x^{(i)}\right)$$
+$$\theta^T x^{(i)} = \sum_{j=0}^n \theta_j x_j^{(i)} = h_{\theta}\left(x^{(i)}\right)$$
 predicts $y^{(i)}$ as well as possible. We measure the performance of our model by the objective function
 $$J(\theta) = \frac{1}{2m}\sum_{i=1}^m \left(h_{\theta}\left(x^{(i)}\right) - y^{(i)}\right)^2 = \frac{1}{2m}(X\theta - y)^T(X\theta-y),$$
 where $m$ is the number of training examples we have, 
@@ -97,7 +97,7 @@ In logistic regression, we want to learn a set of parameters $\theta = [\theta_1
 $$\sigma(\theta^T x^{(i)}) = \sigma\left(\sum_{j = 1}^{n} \theta_j x_j^{(i)} \right) = h_\theta(x^{(i)})$$
 predicts $y^{(i)}$ as well as possible. We measure the performance of our model with the objective function
 \begin{align*}
-J(\theta) &= \frac{1}{m}\sum_{i=1}^{m} -y^{(i)}\log(h_\theta(x)) - (1-y)(\log(1 - h_\theta(x)))\\
+J(\theta) &= \frac{1}{m}\sum_{i=1}^{m} \left(-y^{(i)}\log(h_\theta(x^{(i)})) - (1-y^{(i)})(\log(1 - h_\theta(x^{(i)})))\right)\\
 &= \frac{1}{m}\left(-y^T\log(\sigma(X\theta)) + (1-y)^T(-\log(1-\sigma(X\theta))\right).
 \end{align*}
 We have
@@ -139,7 +139,7 @@ The same points made in the last section about learning rate and feature additio
 The previous section details how to use logistic regression to perform two-class classification. To perform $K$-class classification with $K>2$, the most common way is to simply train $K$ classifiers that predict whether an example displaying a set of inputs $x$ belongs to class $k$ or not, for each $k, 1 \le k \le K$. Then to classify a new example, we simply select the class of the classifier that returns the highest probability. (Note that this can be applied to other classification methods besides logistic regression as well.)
 
 \section{Regularization}
-A common problem in many machine learning applications is the problem of overfitting, where a trained model fits the training data very closely, but missed the overall trend in the data. This can occur, for (a rather contrived) example, if we have 8 training examples, each with a single numeric input and a single numeric output, that follow a rough linear relationship, but we fit a degree-7 polynomial to the data. This results in a perfect fit to the training data, but new data points that lie on the line are unlikely to be close to the model. On the other end of the spectrum, underfitting is also possible, where the model fails to respond to the training data or predicts something too simple to fit the training data well.
+A common problem in many machine learning applications is the problem of overfitting, where a trained model fits the training data very closely, but misses the overall trend in the data. This can occur, for (a rather contrived) example, if we have 8 training examples, each with a single numeric input and a single numeric output, that follow a rough linear relationship, but we fit a degree-7 polynomial to the data. This results in a perfect fit to the training data, but new data points that lie on the line are unlikely to be close to the model. On the other end of the spectrum, underfitting is also possible, where the model fails to respond to the training data or predicts something too simple to fit the training data well.
 
 Oftentimes, we refer to models that overfit as models that have high \emph{variance} (one way to think about this intuitively is that the models change very drastically when new training data is added), and models that underfit as models that have high \emph{bias} (one way to think about this intuitively is to think about these models as having strong predefined notions of what the data should look like, and not changing their behavior when contrasting data is presented).
 
@@ -205,7 +205,7 @@ J(\Theta) &= -\frac{1}{m} \sum_{i=1}^m \sum_{k=1}^K \left(y_k^{(i)}\log\left(h_{
 To calculate the gradient of this objective function, the \emph{backpropagation} algorithm is typically used. The proof of correctness of backpropagation is pretty complex, so we will not spell it out here. To perform backpropagation, begin with values $\Delta_{ij}^{(l)}$ set to 0 for all $i, j, l$. Then for each training example $t = 1, \dots, m$:
 \begin{enumerate}
 \item Set $a^{(1)} = x^{(t)}$, and perform forward propagation to calculate $a^{(l)}$ for each $1 \le l \le L$.
-\item Compute $\delta^{(L)} = a^{(L)} - y^(t)$.
+\item Compute $\delta^{(L)} = a^{(L)} - y^{(t)}$.
 \item For each $L-1 \ge l \ge 1$, compute $\delta^{(l)} = \sigma'(z^{(l)})^d(\Theta^{(l)T}\delta^{(l+1)}) = a^{(l)d}(1 - a^{(l)})^d(\Theta^{(l)T}\delta^{(l+1)})$.
 \item Perform $\Delta^{(l)} := \Delta^{(l)} + \delta^{(l+1)}(a^{(l)})^T.$
 \end{enumerate}
@@ -251,7 +251,11 @@ Things that can help a model with high variance are:
 We can diagnose whether the problem is high bias or high variance by looking at the training and cross-validation errors (unregularized): if the issue is high bias (underfitting), both training and CV error will be high, and if the issue is high variance (overfitting), training error will be much lower than CV error. When tuning hyperparameters of our model (number of features, regularization parameter, number of neurons in a neural network), we can usually approach the issue by minimizing CV error. However, when deciding whether or not more training data would be helpful, we can plot learning curves, which plot training and CV error as a function of the amount of training data used (so we can train our model using only one training example, plot training/CV error, then train with two examples, then three, etc.). If training and CV error approach each other closely early on, then a high error is likely to be a bias issue and more data will not help; if training and CV approach each other slowly and are still far apart even when using the whole training set, then additional data will probably be useful.
 
 \subsection{Error analysis}
-One thing that can be helpful in solving machine learning problems is to train a model on a data set, evaluate it against a cross-validation set, and manually look at some of the examples where it made the largest errors. Based on this, we can get some ideas about what things might be useful to work on next, implement those ideas, and see if our algorithm performed any better. When evaluating the performance of our algorithm, it is important to have a single real-number metric to measure it by; this gives us an unambiguous way to measure whether the algorithm is performing better or not. For regression problems, we might use the squared error (i.e. the usual error function); for classification problems, we might use the classification accuracy rate.
+One thing that can be helpful in solving machine learning problems is to train a model on a data set, evaluate it against a cross-validation set, and manually look at some of the examples where it made the largest errors. Based on this, we can get some ideas about what things might be useful to work on next, implement those ideas, and see if our algorithm performed any better.
+
+\subsection{A new evaluation metric}
+
+When evaluating the performance of our algorithm, it is important to have a single real-number metric to measure it by; this gives us an unambiguous way to measure whether the algorithm is performing better or not. For regression problems, we might use the squared error (i.e. the usual error function); for classification problems, we might use the classification accuracy rate.
 
 \subsubsection{Skewed data}
 One case where the classification accuracy rate may not be a good metric for classifier performance is if we are building a classifier for a rare event. Suppose, for example, that we are trying to predict whether or not a patient has cancer based on an x-ray, and that only 0.5\% of patients actually have cancer. Then if we had an extremely naive classifier that always predicted ``no cancer", we'd have 99.5\% classification accuracy, which might actually perform better than a lot of sophisticated models; however, this clearly doesn't indicate that our model is better.
@@ -330,7 +334,7 @@ $$\Sigma = \frac{1}{m}X^TX.$$
 \end{enumerate}
 Often it is informative to reconstruct the approximation of $X$ represented by $Z$; this can be done with $X' = ZU^T$. One use of this reconstruction is to measure the amount of information retained after the dimensionality reduction; this is usually done using the metric
 $$v = 1 - \frac{\frac{1}{m} \sum_{i=1}^m ||x^{(i)} - x'^{(i)}||^2}{\frac{1}{m} \sum_{i=1}^m ||x^{(i)}||^2},$$
-where $v$ is typically called the variance retained. Oftentimes we want to select the smallest $k$ such that $v \ge v_0$ for some benchmark $v_0$; common values of $v_0$ are 0.95 and 0.99. Luckly, this is easy to do; it turns out that
+where $v$ is typically called the variance retained. Oftentimes we want to select the smallest $k$ such that $v \ge v_0$ for some benchmark $v_0$; common values of $v_0$ are 0.95 and 0.99. Luckily, this is easy to do; it turns out that
 $$v = \sum_{j=1}^k \Lambda_{jj},$$
 where $k$ is the number of dimensions that we reduced to.
 
@@ -357,7 +361,7 @@ Some pros and cons with using separate Gaussians versus the multivariate Gaussia
 A typical way to evaluate an anomaly detection model (especially the parameter $\epsilon$) is to gather a set of both known normal and known anomalous examples, find the examples that the model classifies as anomalous, and then compute the $F_1$ score; we can also use a training and cross-validation set to optimize $\epsilon$. This makes anomaly detection seem a lot like classification on a skewed data set, but typically we use a classification algorithm when we have enough positive examples to know what positive examples generally look like; anomaly detection is more suitable when we have very few positive examples and do not have a good idea of what future positive examples will look like. Furthermore, in a training set for anomaly detection, we do not include anomalous examples, as we are trying to model a probability distribution of normal examples.
 
 \section{Recommender systems}
-For the problem of recommender systems, it helps to have an example for the sake of better intuition. Suppose that we are Netflix, and that we have $n_m$ movies and $n_u$ users on our platform. Each user has watched rated some subset of the movies on our platform, and we want to predict how much they would enjoy the other movies on our platform (more formally, how they would rate those movies). Let $r(i, j)$ be 1 if user $j$ has rated movie $i$, and 0 otherwise, and let $y^{(i, j)}$ be the rating assigned by user $j$ to movie $i$ (if it exists). Furthermore, let $x^{(i)}$ be the feature vector for movie $i$ (more on this later), and $\theta^{(j)}$ be the parameter vector for user $j$. You can imagine this as a linear regression problem, where our model predicts that user $j$ will give movie $i$ a rating of $\theta^{(j)T}x^{(i)}$.
+For the problem of recommender systems, it helps to have an example for the sake of better intuition. Suppose that we are Netflix, and that we have $n_m$ movies and $n_u$ users on our platform. Each user has watched/rated some subset of the movies on our platform, and we want to predict how much they would enjoy the other movies on our platform (more formally, how they would rate those movies). Let $r(i, j)$ be 1 if user $j$ has rated movie $i$, and 0 otherwise, and let $y^{(i, j)}$ be the rating assigned by user $j$ to movie $i$ (if it exists). Furthermore, let $x^{(i)}$ be the feature vector for movie $i$ (more on this later), and $\theta^{(j)}$ be the parameter vector for user $j$. You can imagine this as a linear regression problem, where our model predicts that user $j$ will give movie $i$ a rating of $\theta^{(j)T}x^{(i)}$.
 
 One way to approach this problem is to try to devise features $x$ and acquire ground-truth values for all of them, and simply train a linear regression model for each user. Formally, this can be expressed as trying to minimize the objective function
 $$J(\Theta) = \frac{1}{2}||X\Theta^T - Y||^2 + \frac{\lambda}{2}||\Theta||^2,$$
